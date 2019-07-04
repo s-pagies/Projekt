@@ -20,8 +20,9 @@ int main()
   vector<int> x_position(quantity,0);
   vector<int> y_position(quantity,0);
   vector<int> x1_position(quantity,0);
-  vector<int> y1position(quantity,0);
+  vector<int> y1_position(quantity,0);
 
+//TODO initializing all the other vecors needed for this program
   vector<int> speed(quantity,0);
 
 //loop over all steps
@@ -30,10 +31,10 @@ int main()
 //loop over all particles moving particles for each step
     for (int n=0; n<quantity; n++)
     {
-//TODO calculating current particle speed. particle density and stepsize for random walk
+//TODO calculating current particle speed, particle density and stepsize for random walk
 //Problem: calculating particle speed by v=sqrt((dx/dt)²+(dy/dt)²) would produce non-integers
-      speed[n]=;
-//writing current particle positions into new vector
+      speed[n]=1;
+//writing current particle positions into new vector to calculate speed in next timestep
       x1_position[n] = x_position[n];
       y1_position[n] = y_position[n];
 //random walk movement with stepsize according to particle speed
@@ -50,7 +51,8 @@ int main()
 //TODO convection movement
     }
   }
-//write results into txt-files
+//TODO write results into .txt files
+//shows an error message to my because of using quantity as a constant
   ofstream out("ort.txt");
   for (int i=0; i<quantity; i++)
   {
