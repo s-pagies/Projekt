@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/s-maneum/projekt_cp2/main.cpp
+iostream
+-
+cmath
+-
+vector
+-
+array
+-
+random
+-
+fstream
+-
+chrono
+-
+

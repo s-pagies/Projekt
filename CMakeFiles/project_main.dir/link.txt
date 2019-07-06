@@ -1,0 +1,1 @@
+/opt/gcc-8.2.0/bin/g++       CMakeFiles/project_main.dir/main.cpp.o  -o project_main -rdynamic 
