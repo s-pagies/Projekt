@@ -25,7 +25,7 @@ using namespace std;
 bool test_mode = true;
 bool diffusion = true;
 bool konvektion= true;
-
+bool output    = true;
 void pt(string dec, double val) // print a value to console (FOR DEBUGGING!!!!)
 {
     cout << dec << ": " << val << endl;
@@ -124,14 +124,6 @@ int main()
                 }
 
             }
-/*
-    for(int i=1; i<gridpoints_x+1;i++)
-    {
-        for(int j=1; j<gridpoints_y+1;j++)
-        {
-            density[i][j]=particles_per_gridpoint;
-        }
-    }*/
 
     if(test_mode==true)
     {
@@ -172,7 +164,7 @@ int main()
                         {
                             x_pos[n] = x_pos[n]-x_vel[n];
                         }
-                        if(x_pos[n]+x_vel[n]==gridpoints_x)
+                        if(x_pos[n]+x_vel[n]==gridpoints_x+1)
                         {
                             x_pos[n] = x_pos[n]-x_vel[n];
                         }
@@ -184,7 +176,7 @@ int main()
                         {
                             x_pos[n] = x_pos[n]+x_vel[n];
                         }
-                        if(x_pos[n]-x_vel[n]==gridpoints_x)
+                        if(x_pos[n]-x_vel[n]==gridpoints_x+1)
                         {
                             x_pos[n] = x_pos[n]+x_vel[n];
                         }
@@ -196,7 +188,7 @@ int main()
                         {
                             y_pos[n] = y_pos[n]-y_vel[n];
                         }
-                        if(y_pos[n]+y_vel[n]==gridpoints_y)
+                        if(y_pos[n]+y_vel[n]==gridpoints_y+1)
                         {
                             x_pos[n] = y_pos[n]-y_vel[n];
                         }
@@ -208,7 +200,7 @@ int main()
                         {
                             y_pos[n] = y_pos[n]+y_vel[n];
                         }
-                        if(y_pos[n]-y_vel[n]==gridpoints_y)
+                        if(y_pos[n]-y_vel[n]==gridpoints_y+1)
                         {
                             x_pos[n] = y_pos[n]+y_vel[n];
                         }
@@ -264,7 +256,7 @@ int main()
     //TODO write results into .txt files
 
         // pos:
-        if(10==10)
+        if(output==true)
        {
             //out1<<t<<", "<<endl;
             for (int i=1; i<particle_count+1; i++)
@@ -276,15 +268,6 @@ int main()
             // velocity:
 
             // density:
-            /*
-            for(int i=1; i<gridpoints_x+1;i++)
-            {
-                for(int j=1; j<gridpoints_y+1;j++)
-                {
-                    density[i][j]++;
-                }
-            }*/
-            //out3<<t<<", "<<endl;
             for (int i=1; i<gridpoints_x+1; i++)
             {
                 for (int j=1; j<gridpoints_y+1; j++)
@@ -293,7 +276,6 @@ int main()
                 }
             }
         }
-
 
     }
     execution_time(timer);
