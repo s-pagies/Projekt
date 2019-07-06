@@ -115,9 +115,6 @@ int main()
                     if(x_pos[n]==i && y_pos[n]==j)
                     {
                         density[i][j]++;
-                        pt("teilchen", n);
-                        pt("pos_x", x_pos[n]);
-                        pt("pos_y", y_pos[n]);
                         break;
                     }
                   }
