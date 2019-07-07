@@ -12,6 +12,7 @@ ANNAHMEN:
 -
 -
 */
+#include <bits/stdc++.h>
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -34,6 +35,15 @@ void pt(string dec, double val) // print a value to console (FOR DEBUGGING!!!!)
 double execution_time(auto time)
 {
     auto end_timer = std::chrono::system_clock::now();
+    double diff = chrono::duration_cast<chrono::nanoseconds>(end_timer - time).count();
+    diff *= 1e-9;
+    cout << "Time taken by program is : "  <<fixed << diff << setprecision(4);
+    cout << " sec" << endl;
+    return 0;
+}
+double execution_time2(auto time)
+{
+    auto end_timer = std::chrono::system_clock::now();
     chrono::duration<double> diff = end_timer-time;
     time_t end_time = chrono::system_clock::to_time_t(end_timer);
     pt("exeution_time in (s)", diff.count());
@@ -54,12 +64,12 @@ int main()
     uniform_real_distribution<double> dis(0,1);
 
     //predefining variables, vectors for particles and grid
-    int particle_count  = 10000;         // number of particles
+    int particle_count  = 1e5;          // number of particles
     int time_step       = 10;          // number of timesteps
-    double grid_width   = 10;           // width of the grid (x-koord.)
-    double grid_height  = 10;           // height of the grid (y-koord.)
-    double grid_x_step  = 0.1;            //
-    double grid_y_step  = 0.1;            //
+    double grid_width   = 100;          // width of the grid (x-koord.)
+    double grid_height  = 100;          // height of the grid (y-koord.)
+    double grid_x_step  = 1;            // stepwidth for x
+    double grid_y_step  = 1;            // stepwidth for y
     double gridpoints_x = grid_width/grid_x_step;
     double gridpoints_y = grid_height/grid_y_step;
     double gridpoint_count = gridpoints_x*gridpoints_y;
@@ -91,6 +101,9 @@ int main()
     {
         for(int j=1;j<gridpoints_y+1;j++)
         {
+            // set all density to 0
+            density[i][j]=0;
+            // set position of the particles
             for(int k=1;k<particles_per_gridpoint+1;k++)
             {
                 x_pos[k+particles_per_gridpoint*i+particles_per_gridpoint*j-2*particles_per_gridpoint+(gridpoints_y-1)*abstand]=i;
@@ -98,15 +111,6 @@ int main()
             }
         }
         abstand+=particles_per_gridpoint;
-    }
-
-    // seit all density to 0
-    for(int i=1;i<gridpoints_x+1;i++)
-    {
-        for(int j=1;j<gridpoints_y+1;j++)
-        {
-            density[i][j]=0;
-        }
     }
 
     // get density from position
@@ -119,9 +123,6 @@ int main()
                 if(x_pos[n]==i && y_pos[n]==j)
                 {
                     density[i][j]++;
-                    pt("teilchen", n);
-                    pt("pos_x", x_pos[n]);
-                    pt("pos_y", y_pos[n]);
                     break;
                 }
             }
@@ -146,7 +147,33 @@ int main()
         //loop over all particles moving particles for each step
         for (int n=1; n<particle_count+1; n++)
         {
-            pt("teilchen", n);
+            if(test_mode==true)
+            {
+                if(n==1)
+                {
+                    pt("teilchen", n);
+                }
+                if(n==particle_count/10)
+                {
+                    pt("teilchen", n);
+                }
+                if(n==particle_count*25/100)
+                {
+                    pt("teilchen", n);
+                }
+                if(n==particle_count*5/10)
+                {
+                    pt("teilchen", n);
+                }
+                if(n==particle_count*75/100)
+                {
+                    pt("teilchen", n);
+                }
+                if(n==particle_count)
+                {
+                    pt("teilchen", n);
+                }
+            }
             //Diffusion
             if(diffusion==true)
             {
@@ -221,50 +248,58 @@ int main()
                         density[x_pos[n]][y_pos[n]]++;
                 }
             }
-
-
-            //TODO convection movement
-            if(konvektion==true)
+                        //TODO convection movement
+            if(konvektion==true)// konvecktionSTERM = -v \nabla(c)
             {
-
-            }
-
-        }
-
-        if(0==true)
-        {
-            int sum=0;
-            for(int i=1;i<gridpoints_x+1;i++)
-            {
-                for(int j=1;j<gridpoints_y+1;j++)
+                double c        = density[x_pos[n]][y_pos[n]];
+                if(x_pos[n]==1)// if particle is at the bottom of the room, don't check the density of the point below
                 {
-                    sum+=density[i][j];
+                    double dc_x_p   = density[x_pos[n]+1][y_pos[n]]-c/grid_x_step;
+                    //double dc_x_n   = NULL;
+                    double dc_x     = dc_x_p;
                 }
+                if(x_pos[n]==grid_width) // if particle is on top of the room, don't check the density of the point above
+                {
+                    //double dc_x_p   = NULL;
+                    double dc_x_n   = density[x_pos[n]-1][y_pos[n]]-c/grid_x_step;
+                    double dc_x     = dc_x_n;
+                }
+                else
+                {
+                    double dc_x_p   = density[x_pos[n]+1][y_pos[n]]-c/grid_x_step;
+                    double dc_x_n   = density[x_pos[n]-1][y_pos[n]]-c/grid_x_step;
+                    double dc_x     = 1/2*(dc_x_p-dc_x_n);
+                }
+                double dc_y_p   = density[x_pos[n]][y_pos[n]+1]-c/grid_y_step;
+                double dc_y_n   = density[x_pos[n]-1][y_pos[n]-1]-c/grid_y_step;
+                double dc_y     = 1/2*(dc_y_p-dc_y_n);
+                //dc[n]
             }
-            out4<<t<<", "<< sum<<endl;
+            // write results - pos:
+            if(output==true){
+            out1<<n<<", "<<x_pos[n]<<", "<<y_pos[n]<<endl;}
         }
-    //TODO write results into .txt files
 
-        // pos:
+
+    //TODO write results into .txt files
         if(output==true)
         {
-            //out1<<t<<", "<<endl;
-            for (int i=1; i<particle_count+1; i++)
-            {
-                    out1<<i<<", "<<x_pos[i]<<", "<<y_pos[i]<<endl;
-
-            }
-
             // velocity:
 
             // density:
+            int sum=0;
             for (int i=1; i<gridpoints_x+1; i++)
             {
                 for (int j=1; j<gridpoints_y+1; j++)
                 {
+                    if(test_mode==true)
+                    {
+                        sum+=density[i][j];
+                    }
                     out3<<i<<", "<<j<<", "<<density[i][j]<<endl;
                 }
             }
+            out4<<t<<", "<< sum<<endl;
         }
 
     }
