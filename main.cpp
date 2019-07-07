@@ -1,6 +1,5 @@
 /*
 ________________________________________________
-
 CP2 - PROJEKT: KONEVKTIONS-DIFFUSIONS-GLEICHUNG
 P. F. Giesel, M. Neumann
 Last Update: 06.07.2019
@@ -55,16 +54,22 @@ int main()
     uniform_real_distribution<double> dis(0,1);
 
     //predefining variables, vectors for particles and grid
-    int particle_count  = 250;         // number of particles
+    int particle_count  = 10000;         // number of particles
     int time_step       = 10;          // number of timesteps
-    double grid_width   = 5;           // width of the grid (x-koord.)
-    double grid_height  = 5;           // height of the grid (y-koord.)
-    double grid_x_step  = 1;            //
-    double grid_y_step  = 1;            //
+    double grid_width   = 10;           // width of the grid (x-koord.)
+    double grid_height  = 10;           // height of the grid (y-koord.)
+    double grid_x_step  = 0.1;            //
+    double grid_y_step  = 0.1;            //
     double gridpoints_x = grid_width/grid_x_step;
     double gridpoints_y = grid_height/grid_y_step;
     double gridpoint_count = gridpoints_x*gridpoints_y;
     double particles_per_gridpoint = particle_count/gridpoint_count;
+
+    if(particles_per_gridpoint<1)
+    {
+        pt("error: particles_per_gridpoint is < 1 ",0);
+        return 0;
+    }
 
     vector<double> x_pos(particle_count+1,0.0);
     vector<double> y_pos(particle_count+1,0.0);
@@ -73,7 +78,7 @@ int main()
     vector<double> x_vel(particle_count+1,0.0);
     vector<double> y_vel(particle_count+1,0.0);
     vector<double> velocity(particle_count+1,0.0);
-    array<array<double,10+1>,10+1> density;
+    array<array<double,100+1>,100+1> density;
     ofstream out1("position.txt");
     ofstream out2("velocity.txt");
     ofstream out3("density.txt");
@@ -81,7 +86,7 @@ int main()
   // TODO Set distribution of the particles
 
   // Equal distribution:
-  int abstand = 0;
+    int abstand = 0;
     for(int i=1;i<gridpoints_x+1;i++)
     {
         for(int j=1;j<gridpoints_y+1;j++)
@@ -96,31 +101,32 @@ int main()
     }
 
     // seit all density to 0
-            for(int i=1;i<gridpoints_x+1;i++)
-            {
-              for(int j=1;j<gridpoints_y+1;j++)
-              {
-                    density[i][j]=0;
-
-              }
-            }
+    for(int i=1;i<gridpoints_x+1;i++)
+    {
+        for(int j=1;j<gridpoints_y+1;j++)
+        {
+            density[i][j]=0;
+        }
+    }
 
     // get density from position
-            for(int n =1;n<particle_count+1;n++)
+    for(int n =1;n<particle_count+1;n++)
+    {
+        for(int i=1;i<gridpoints_x+1;i++)
+        {
+            for(int j=1;j<gridpoints_y+1;j++)
             {
-                for(int i=1;i<gridpoints_x+1;i++)
+                if(x_pos[n]==i && y_pos[n]==j)
                 {
-                  for(int j=1;j<gridpoints_y+1;j++)
-                  {
-                    if(x_pos[n]==i && y_pos[n]==j)
-                    {
-                        density[i][j]++;
-                        break;
-                    }
-                  }
+                    density[i][j]++;
+                    pt("teilchen", n);
+                    pt("pos_x", x_pos[n]);
+                    pt("pos_y", y_pos[n]);
+                    break;
                 }
-
             }
+        }
+    }
 
     if(test_mode==true)
     {
@@ -135,9 +141,12 @@ int main()
     //loop over all time steps
     for (int t=1; t<time_step+1; t++)
     {
+        pt("t", t);
+        execution_time(timer);
         //loop over all particles moving particles for each step
         for (int n=1; n<particle_count+1; n++)
         {
+            pt("teilchen", n);
             //Diffusion
             if(diffusion==true)
             {
@@ -157,6 +166,7 @@ int main()
                 double zufall=dis(gen);
                 if (zufall < 0.25)
                     {
+                        density[x_pos[n]][y_pos[n]]--;
                         if(x_pos[n]+x_vel[n]==0)
                         {
                             x_pos[n] = x_pos[n]-x_vel[n];
@@ -166,9 +176,11 @@ int main()
                             x_pos[n] = x_pos[n]-x_vel[n];
                         }
                         else{x_pos[n] = x_pos[n]+x_vel[n];}
+                        density[x_pos[n]][y_pos[n]]++;
                     }
                 if (zufall >= 0.25 && zufall < 0.5)
                     {
+                        density[x_pos[n]][y_pos[n]]--;
                         if(x_pos[n]-x_vel[n]==0)
                         {
                             x_pos[n] = x_pos[n]+x_vel[n];
@@ -178,9 +190,11 @@ int main()
                             x_pos[n] = x_pos[n]+x_vel[n];
                         }
                         else{x_pos[n] = x_pos[n]-x_vel[n];}
+                        density[x_pos[n]][y_pos[n]]++;
                     }
                 if (zufall >= 0.5 && zufall < 0.75)
                 {
+                        density[x_pos[n]][y_pos[n]]--;
                         if(y_pos[n]+y_vel[n]==0)
                         {
                             y_pos[n] = y_pos[n]-y_vel[n];
@@ -190,9 +204,11 @@ int main()
                             x_pos[n] = y_pos[n]-y_vel[n];
                         }
                         else{y_pos[n] = y_pos[n]+y_vel[n];}
+                        density[x_pos[n]][y_pos[n]]++;
                 }
                 if (zufall >= 0.75)
                 {
+                        density[x_pos[n]][y_pos[n]]--;
                         if(y_pos[n]-y_vel[n]==0)
                         {
                             y_pos[n] = y_pos[n]+y_vel[n];
@@ -202,6 +218,7 @@ int main()
                             x_pos[n] = y_pos[n]+y_vel[n];
                         }
                         else{y_pos[n] = y_pos[n]-y_vel[n];}
+                        density[x_pos[n]][y_pos[n]]++;
                 }
             }
 
@@ -211,34 +228,10 @@ int main()
             {
 
             }
-            // Calculate Density new
-            // set to zero
-            for(int i=1;i<gridpoints_x+1;i++)
-            {
-              for(int j=1;j<gridpoints_y+1;j++)
-              {
-                    density[i][j]=0;
-              }
-            }
-            // get density
-            for(int n =1;n<particle_count+1;n++)
-            {
-                for(int i=1;i<gridpoints_x+1;i++)
-                {
-                  for(int j=1;j<gridpoints_y+1;j++)
-                  {
-                    if(x_pos[n]==i && y_pos[n]==j)
-                    {
-                        density[i][j]+=1;
-                    }
-                  }
-                }
-
-            }
 
         }
-        
-        if(test_mode=true)
+
+        if(0==true)
         {
             int sum=0;
             for(int i=1;i<gridpoints_x+1;i++)
@@ -254,7 +247,7 @@ int main()
 
         // pos:
         if(output==true)
-       {
+        {
             //out1<<t<<", "<<endl;
             for (int i=1; i<particle_count+1; i++)
             {
