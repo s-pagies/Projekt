@@ -300,12 +300,6 @@ int main()
             {
                 if(discreet==true)
                 {
-                    //TODO calculating current particle velocity, particle density and stepsize for random walk
-                    //Problem: calculating particle velocity by v=sqrt((dx/dt)²+(dy/dt)²) would produce non-integers
-                    //writing current particle positions into new vector to calculate velocity in next timestep
-                    //x_pos_2[n] = x_pos[n];
-                    //y_pos_2[n] = y_pos[n];
-
                     // calculate velocity
                     x_vel[n] = 1; //x_pos_2[n]-x_pos[n];
                     y_vel[n] = 1; //y_pos_2[n]-y_pos[n];
