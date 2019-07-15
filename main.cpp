@@ -1,16 +1,10 @@
 /*
-_________________________________________________
+________________________________________________
 CP2 - PROJEKT: KONEVKTIONS-DIFFUSIONS-GLEICHUNG
 P. F. Giesel, M. Neumann
-Last Update: 06.07.2019
+Last Update: 10.07.2019
 ________________________________________________
-ANNAHMEN:
-- Homogene Masse (Besteht nur aus einem Stoff, anfangs überall gleich bzgl. Dichte<->Temperatur)
-- 2 Dimensional
-- Umgebungsdruck konstant       = 1. GP
-- Gravitationkonstante konstant = 9.81m/s^2
--
--
+Anmerkung : Florian konnte im Verlauf unserer Kooperation nicht mhr bei GitHub pushen!!
 */
 #include <bits/stdc++.h>
 #include <iostream>
@@ -24,14 +18,14 @@ ANNAHMEN:
 using namespace std;
 
 bool test_mode  = true;
-bool diffusion  = true;
+bool diffusion  = 1;
 bool diffusion2 = false; // BOX-MULLER
-bool konvektion = false;
-bool discrete   = true;
+bool konvektion = 0;
+bool discreet   = true;
 bool output     = true;
 
 double T1 = 100;
-double T2 = 20;
+double T2 = 10;
 
 void pt(string dec, double val) // print a value to console (FOR DEBUGGING!!!!)
 {
@@ -58,7 +52,7 @@ int main()
 
     //predefining variables, vectors for particles and grid
     int particle_count  = 4e3;          // number of particles
-    int time_step       = 20 ;          // number of timesteps
+    int time_step       = 400;          // number of timesteps
     double grid_width   = 20;          // width of the grid (x-koord.)
     double grid_height  = 20;          // height of the grid (y-koord.)
     double grid_x_step  = 1;            // stepwidth for x
@@ -89,9 +83,9 @@ int main()
     ofstream out5("set.txt");
     out5<<gridpoints_x << ", "<<gridpoints_y << ", "<<time_step<<", "<<particle_count<<endl;  // n
   // TODO Set distribution of the particles
-    int a=4; // dis
-    int v=1; //velocity
-    if(discrete==true)
+    int a=grid_height/5; // dis
+    int v=3; //velocity for convection
+    if(discreet==true)
     {
     // Equal distribution:
     int abstand = 0;
@@ -131,7 +125,6 @@ int main()
 
     for(int i=1;i<gridpoints_x+1;i++)
     {
-        pt("i.",i);
         double dens_old_1 = density[1][i];
         density[1][i]=T1;
         particle_count+=T1-dens_old_1;
@@ -144,7 +137,7 @@ int main()
         }
 
 
-        double dens_old_2 = density[gridpoints_x][i];
+        double dens_old_2 = density[gridpoints_x+1][i];
         density[gridpoints_x][i]=T2;
         particle_count+=T2-dens_old_2;
         for(int n=1;n<T2-dens_old_2+1;n++)
@@ -186,6 +179,59 @@ int main()
         {
             out3<<i<<", "<<j<<", "<<density[i][j]<<endl;
         }
+    }
+    for(int g=0;g<gridpoints_x;g++)
+    {
+
+    if(v-1>0&&0==1)
+    {
+        v=v-1;
+        for(int i = 0;i<gridpoints_x+1;i++)
+        {
+            for(int j=0;j<gridpoints_y+1;j++)
+            {
+                if(velocity[i][j]>v)
+                {
+                    if(velocity[i+1][j+1]==0)
+                    {
+                        velocity[i+1][j+1]=v;
+                    }
+                    if(velocity[i+1][j]==0)
+                    {
+                        velocity[i+1][j]=v;
+                    }
+                    if(velocity[i+1][j-1]==0)
+                    {
+                        velocity[i+1][j-1]=v;
+                    }
+
+                    if(velocity[i][j+1]==0)
+                    {
+                        velocity[i][j+1]=v;
+                    }
+                    if(velocity[i][j-1]==0)
+                    {
+                        velocity[i][j-1]=v;
+                    }
+
+                    if(velocity[i-1][j+1]==0)
+                    {
+                        velocity[i-1][j+1]=v;
+                    }
+                    if(velocity[i-1][j]==0)
+                    {
+                        velocity[i-1][j]=v;
+                    }
+                    if(velocity[i-1][j-1]==0)
+                    {
+                        velocity[i-1][j-1]=v;
+                    }
+                }
+            }
+        }
+    }
+    else{break;}
+
     }
     //write initila velo-field
     for (int i=1; i<gridpoints_x+1; i++)
@@ -252,7 +298,7 @@ int main()
             //Diffusion
             if(diffusion==true)
             {
-                if(discrete==true)
+                if(discreet==true)
                 {
                     //TODO calculating current particle velocity, particle density and stepsize for random walk
                     //Problem: calculating particle velocity by v=sqrt((dx/dt)²+(dy/dt)²) would produce non-integers
@@ -267,40 +313,40 @@ int main()
                     //random walk movement with stepsize according to particle velocity
                     //Question: local density could also be taken into account as collision probability rises with higher densities
                     double zufall=dis(gen);
-
                     if (zufall < 0.25)
+                    {
+                        if(density[x_pos[n]][y_pos[n]]>0)
                         {
-                            if(density[x_pos[n]][y_pos[n]]>0)
-                            {density[x_pos[n]][y_pos[n]]--;
-                        if(x_pos[n]+x_vel[n]==0)
-                        {
-                            x_pos[n] = x_pos[n]-x_vel[n];
-                        }
-                        if(x_pos[n]+x_vel[n]==gridpoints_x+1)
-                        {
-                            x_pos[n] = x_pos[n]-x_vel[n];
-                        }
-                        else{x_pos[n] = x_pos[n]+x_vel[n];}
-                        density[x_pos[n]][y_pos[n]]++;
-
+                            density[x_pos[n]][y_pos[n]]--;
+                            if(x_pos[n]+x_vel[n]==0)
+                            {
+                                x_pos[n] = x_pos[n]-x_vel[n];
                             }
+                            if(x_pos[n]+x_vel[n]==gridpoints_x+1)
+                            {
+                                x_pos[n] = x_pos[n]-x_vel[n];
+                            }
+                            else{x_pos[n] = x_pos[n]+x_vel[n];}
+                            density[x_pos[n]][y_pos[n]]++;
                         }
+                    }
                     if (zufall >= 0.25 && zufall < 0.5)
+                    {
+                        if(density[x_pos[n]][y_pos[n]]>0)
                         {
-                            if(density[x_pos[n]][y_pos[n]]>0)
-                            { density[x_pos[n]][y_pos[n]]--;
-                        if(x_pos[n]-x_vel[n]==0)
-                        {
-                            x_pos[n] = x_pos[n]+x_vel[n];
-                        }
-                        if(x_pos[n]-x_vel[n]==gridpoints_x+1)
-                        {
-                            x_pos[n] = x_pos[n]+x_vel[n];
-                        }
-                        else{x_pos[n] = x_pos[n]-x_vel[n];}
-                        density[x_pos[n]][y_pos[n]]++;
+                            density[x_pos[n]][y_pos[n]]--;
+                            if(x_pos[n]-x_vel[n]==0)
+                            {
+                                x_pos[n] = x_pos[n]+x_vel[n];
                             }
+                            if(x_pos[n]-x_vel[n]==gridpoints_x+1)
+                            {
+                                x_pos[n] = x_pos[n]+x_vel[n];
+                            }
+                            else{x_pos[n] = x_pos[n]-x_vel[n];}
+                            density[x_pos[n]][y_pos[n]]++;
                         }
+                    }
                     if (zufall >= 0.5 && zufall < 0.75)
                     {
                         if(density[x_pos[n]][y_pos[n]]>0)
@@ -312,7 +358,7 @@ int main()
                             }
                             if(y_pos[n]+y_vel[n]==gridpoints_y+1)
                             {
-                                x_pos[n] = y_pos[n]-y_vel[n];
+                                y_pos[n] = y_pos[n]-y_vel[n];
                             }
                             else{y_pos[n] = y_pos[n]+y_vel[n];}
                             density[x_pos[n]][y_pos[n]]++;
@@ -329,7 +375,7 @@ int main()
                             }
                             if(y_pos[n]-y_vel[n]==gridpoints_y+1)
                             {
-                                x_pos[n] = y_pos[n]+y_vel[n];
+                                y_pos[n] = y_pos[n]+y_vel[n];
                             }
                             else{y_pos[n] = y_pos[n]-y_vel[n];}
                             density[x_pos[n]][y_pos[n]]++;
@@ -344,101 +390,48 @@ int main()
             }
 
 
-
-            // after diffusion, reset heatcount(particle) at the top and bottom
-            for(int i=1;i<gridpoints_x+1;i++)
+            // convection movement
+            if(konvektion==true)
             {
-                double dens_old_1 = density[1][i];
-                density[1][i]=T1;
-                if(T1-dens_old_1>0) // set back to T1 by adding
-                {
-                    //pt("aenderung1",T1-dens_old_1);
-                    particle_count+=T1-dens_old_1;
-                    for(int m=1;m<T1-dens_old_1+1;m++)
+                if(discreet==true)
+                { // still just for one grid size - TODO: fit to velocityfield
+                    // cell 1
+                    for(int i=0;i<2;i++)
                     {
-                        x_pos.push_back(i);
-                        y_pos.push_back(1);
-                        x_vel.push_back(0);
-                        y_vel.push_back(0);
-                    }
-                }
-
-
-                double dens_old_2 = density[gridpoints_x][i];
-                density[gridpoints_x][i]=T2;
-                if(T2-dens_old_2!=0)
-                {
-                    //pt("aenderung1",T2-dens_old_2);
-                    particle_count+=T2-dens_old_2;
-                    for(int n=1;n<T2-dens_old_2+1;n++)
-                    {
-                        x_pos.push_back(i);
-                        y_pos.push_back(gridpoints_x);
-                        x_vel.push_back(0);
-                        y_vel.push_back(0);
-                    }
-                }
-            }
-
-            //TODO convection movement
-            if(konvektion==true)// konvecktionSTERM = - \nabla(vc)
-            {
-                if(discrete==true)
-                {
-                float gx_2 = gridpoints_x*0.5;
-                if(x_pos[n]<=2)
-                {
-                    if(y_pos[n]>=a && y_pos[n]<=gridpoints_y-a)
-                    {
-                        y_pos[n] += -v;
-                    }
-                }
-                if(x_pos[n]>2 && x_pos[n]<gx_2-2)
-                {
-                    if(y_pos[n]>=a-1 && y_pos[n]<=a+1)
-                    {
-                        x_pos[n] += v;
-                    }
-                    if(y_pos[n]>=gridpoints_y-a-1 && y_pos[n]<=gridpoints_y-a+1)
-                    {
-                        x_pos[n] += v;
-                    }
-                }
-                if(x_pos[n]>=gx_2-2 && x_pos[n]<=gx_2)
-                {
-                    if(y_pos[n]>=a && y_pos[n]<=gridpoints_y-a)
-                    {
-                        y_pos[n] += v;
-                    }
-                }
-                if(x_pos[n]>gx_2 && x_pos[n]<= gx_2+2)
-                {
-                    if(y_pos[n]>=a && y_pos[n]<=gridpoints_y-a)
-                    {
-                        y_pos[n] += v;
-                    }
-                }
-                if(x_pos[n]>gx_2+2 && x_pos[n]<gridpoints_x-2)
-                {
-                    if(y_pos[n]>=a-1 && y_pos[n]<=a+1)
-                    {
-                        x_pos[n] += -v;
-                    }
-                    if(y_pos[n]>=gridpoints_y-a-1 && y_pos[n]<=gridpoints_y-a+1)
-                    {
-                        x_pos[n] += v;
-                    }
-                }
-                    if(x_pos[n]>=gridpoints_x-2)
-                    {
-                        if(y_pos[n]>=a && y_pos[n]<=gridpoints_y-a)
+                        if(y_pos[n]>a-1 && y_pos[n]<a+1 && x_pos[n]> a-1 && x_pos[n]< gridpoints_x/2 )
                         {
-                          y_pos[n] += -v;
+                            x_pos[n]+=1;
+                        }
+                        if(y_pos[n]>a && y_pos[n]<gridpoints_y-2 && x_pos[n]> a-1 && x_pos[n]< a-1+2)
+                        {
+                            y_pos[n]-=1;
+                        }
+                        if(y_pos[n]<gridpoints_x-a+2 && y_pos[n]>gridpoints_y-a+2-2 && x_pos[n]> a-1+1 && x_pos[n]< gridpoints_x/2 -1+2)
+                        {
+                            x_pos[n]-=1;
+                        }
+                        if(y_pos[n]>a-1 && y_pos[n]<gridpoints_y-a+1 && x_pos[n]>gridpoints_x/2 -1 && x_pos[n]<gridpoints_x/2 +1)
+                        {
+                            y_pos[n]+=1;
+                        }
+                        //cell-2
+                        if(y_pos[n]>a-1 && y_pos[n]<gridpoints_y-a+1 && x_pos[n]> gridpoints_x/2 && x_pos[n]< gridpoints_x/2 +2)
+                        {
+                            y_pos[n]+=1;
+                        }
+                        if(y_pos[n]>a-1 && y_pos[n]<a+1 && x_pos[n]<gridpoints_x -a+2 && x_pos[n]> gridpoints_x/2 )
+                        {
+                            x_pos[n]-=1;
+                        }
+                        if(y_pos[n]>a && y_pos[n]<gridpoints_y-a+2 && x_pos[n]>gridpoints_x-a && x_pos[n]<gridpoints_x-a+2)
+                        {
+                            y_pos[n]-=1;
+                        }
+                        if(y_pos[n]<gridpoints_x-a+2 && y_pos[n]>gridpoints_y-a+2-2 && x_pos[n]<gridpoints_x-a+1 && x_pos[n]> gridpoints_x/2)
+                        {
+                            x_pos[n]+=1;
                         }
                     }
-
-
-
                 }
                 else
                 {
@@ -447,7 +440,6 @@ int main()
                     double vgy_a = v*gridpoints_y/a;
                     double i_gy2a = 1/(gridpoints_y*0.5-a);
                     double gra = 1/(gridpoints_y*0.5-a)*gridpoints_y*0.5;
-            //TODO convection movement
                     if(true==true)
                     {
                         if(x_pos[n]<=gridpoints_x*0.5)
@@ -491,6 +483,86 @@ int main()
             //out1<<n<<", "<<x_pos[n]<<", "<<y_pos[n]<<endl;}
         }// end of particle loop
 
+if(t==200)
+{
+    konvektion=true;
+    //diffusion=0;
+}
+//calculate dens new
+    if(1==true)
+    {
+
+    for(int i=1;i<gridpoints_x+1;i++)
+    {
+        for(int j=1;j<gridpoints_y+1;j++)
+        {
+            density[i][j]=0;
+        }
+    }
+
+    // get density from position
+
+    for(int n =1;n<particle_count+1;n++)
+    {
+        for(int i=1;i<gridpoints_x+1;i++)
+        {
+            for(int j=1;j<gridpoints_y+1;j++)
+            {
+                if(x_pos[n]==i && y_pos[n]==j)
+                {
+                    density[j][i]++;
+                    break;
+                }
+            }
+        }
+    }
+
+    }
+       // after all, reset heatcount(particle) to start condition at the top and bottom
+           for(int i=1;i<gridpoints_x+1;i++)
+            {
+                double dens_old_1 = density[1][i];
+                density[1][i]=T1;
+                if(T1-dens_old_1>0) // set back to T1 by adding
+                {
+                    //pt("aenderung1",T1-dens_old_1);
+                    particle_count+=T1-dens_old_1;
+                    for(int m=1;m<T1-dens_old_1+1;m++)
+                    {
+                        x_pos.push_back(i);
+                        y_pos.push_back(1);
+                        x_vel.push_back(0);
+                        y_vel.push_back(0);
+                    }
+                }
+                else if(T1-dens_old_1<0)
+                {
+                    particle_count+=T1-dens_old_1;
+                    //remove vecs for removed particles
+                }
+
+
+                double dens_old_2 = density[gridpoints_x][i];
+                density[gridpoints_x][i]=T2;
+                if(T2-dens_old_2>0)
+                {
+                    //pt("aenderung1",T2-dens_old_2);
+                    particle_count+=T2-dens_old_2;
+                    for(int n=1;n<T2-dens_old_2+1;n++)
+                    {
+                        x_pos.push_back(i);
+                        y_pos.push_back(gridpoints_x);
+                        x_vel.push_back(0);
+                        y_vel.push_back(0);
+                    }
+                }
+                else if(T2-dens_old_2<0)
+                {
+                    particle_count+=T2-dens_old_2;
+                    //remove vecs for removed particles
+
+                }
+            }
     //TODO write results into .txt files
         if(output==true)
         {
